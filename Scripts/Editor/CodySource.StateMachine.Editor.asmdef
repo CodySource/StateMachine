@@ -1,0 +1,16 @@
+{
+    "name": "CodySource.StateMachine.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:3978bab06b4886a41a59aed898301235"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
