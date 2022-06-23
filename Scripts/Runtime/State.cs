@@ -34,22 +34,22 @@ namespace CodySource
             /// <summary>
             /// Enter the state by calling the enter state callbacks.
             /// </summary>
-            public void _Enter() => callbacks.FindAll(c => c.conditions.HasFlag(CallbackCondition.Enter)).ForEach(c => c.onInvoke?.Invoke());
+            public void _Enter() => callbacks.FindAll(c => c.conditions.HasFlag(CallbackCondition.Enter) && c.active).ForEach(c => c.onInvoke?.Invoke());
 
             /// <summary>
             /// Invoke the state's update callbacks.
             /// </summary>
-            public void _Update() => callbacks.FindAll(c => c.conditions.HasFlag(CallbackCondition.Update)).ForEach(c => c.onInvoke?.Invoke());
+            public void _Update() => callbacks.FindAll(c => c.conditions.HasFlag(CallbackCondition.Update) && c.active).ForEach(c => c.onInvoke?.Invoke());
 
             /// <summary>
             /// Invoke the state's fixed update callbacks.
             /// </summary>
-            public void _FixedUpdate() => callbacks.FindAll(c => c.conditions.HasFlag(CallbackCondition.FixedUpdate)).ForEach(c => c.onInvoke?.Invoke());
+            public void _FixedUpdate() => callbacks.FindAll(c => c.conditions.HasFlag(CallbackCondition.FixedUpdate) && c.active).ForEach(c => c.onInvoke?.Invoke());
 
             /// <summary>
             /// Exit the state by calling the exit state callbacks.
             /// </summary>
-            public void _Exit() => callbacks.FindAll(c => c.conditions.HasFlag(CallbackCondition.Exit)).ForEach(c => c.onInvoke?.Invoke());
+            public void _Exit() => callbacks.FindAll(c => c.conditions.HasFlag(CallbackCondition.Exit) && c.active).ForEach(c => c.onInvoke?.Invoke());
 
             /// <summary>
             /// Overriding the standard comparison for States to simply check names match.
@@ -83,6 +83,7 @@ namespace CodySource
             {
                 public string name = "";
                 public CallbackCondition conditions;
+                public bool active = true;
                 public UnityEvent onInvoke = new UnityEvent();
             }
 
