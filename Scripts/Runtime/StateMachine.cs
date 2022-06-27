@@ -172,6 +172,21 @@ namespace CodySource
                 _SetState(_availableStates[_previousIndex]);
             }
 
+            /// <summary>
+            /// Targets a specific callback in a specific state and toggles its activity
+            /// State Name>Callback Name>True or T
+            /// </summary>
+            public void SetStateCallbackIsActive(string pInfo)
+            {
+                if (pInfo.Split('>').Length < 2) return;
+                State _target = _availableStates.Find(s => s.name == pInfo.Split('>')[0]);
+                if (_target == null) return;
+                State.Callback _callback = _target.callbacks.Find(c => c.name == pInfo.Split('>')[1]);
+                if (_callback == null) return;
+                _callback.active = (pInfo.Split('>').Length > 2 && 
+                    (pInfo.Split('>')[2].ToUpper() == "T" || pInfo.Split('>')[2].ToUpper() == "TRUE"));
+            }
+
             #endregion
 
             #region PRIVATE METHODS

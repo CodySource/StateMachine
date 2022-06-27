@@ -7,6 +7,7 @@ namespace CodySource
 {
     namespace StateMachine
     {
+#if UNITY_EDITOR
         [CustomEditor(typeof(StateMachine))]
         public class StateMachine_Inspector : Editor
         {
@@ -39,5 +40,6 @@ namespace CodySource
 
             private void OnEnable() => _currentState = serializedObject.FindProperty("_currentState");
         }
+#endif
     }
 }
