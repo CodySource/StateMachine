@@ -56,6 +56,11 @@ namespace CodySource
             [SerializeField] private List<State> _availableStates = new List<State>();
 
             /// <summary>
+            /// A public accessor to the available states.
+            /// </summary>
+            public List<State> availableStates => _availableStates;
+
+            /// <summary>
             /// The current state of the state machine
             /// </summary>
             [HideInInspector] [SerializeField] private State _currentState = null;
