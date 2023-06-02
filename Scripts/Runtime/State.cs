@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace CodySource
 {
@@ -82,9 +85,30 @@ namespace CodySource
             public class Callback
             {
                 public string name = "";
+                [IDDrawer] [Tooltip("Click the button to copy the callback Id")]
+                public string callbackId = "";
                 public CallbackCondition conditions;
                 public bool active = true;
+                public void SetActive(bool tf) => active = tf;
                 public UnityEvent onInvoke = new UnityEvent();
+                public class IDDrawer : PropertyAttribute { }
+#if UNITY_EDITOR
+                [CustomPropertyDrawer(typeof(IDDrawer))]
+                public class ReadOnlyAttrDrawer : PropertyDrawer
+                {
+                    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+                    {
+                        property.stringValue = (property.stringValue == "") ? System.Guid.NewGuid().ToString() : property.stringValue;
+                        EditorGUI.LabelField(position, label);
+                        GUI.backgroundColor = Color.yellow;
+                        GUI.contentColor = Color.white;
+                        Rect buttonPos = new Rect(position.x + EditorGUIUtility.labelWidth, position.y, position.width - EditorGUIUtility.labelWidth, position.height);
+                        if (GUI.Button(buttonPos, $"{property.stringValue}")) GUIUtility.systemCopyBuffer = property.stringValue;
+                        GUI.backgroundColor = Color.white;
+                        GUI.contentColor = Color.white;
+                    }
+                }
+#endif
             }
 
             #endregion

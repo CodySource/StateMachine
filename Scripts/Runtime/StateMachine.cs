@@ -6,7 +6,7 @@ using UnityEngine.Events;
 namespace CodySource
 {
     namespace StateMachine
-    { 
+    {
         /// <summary>
         /// This is a per-object state machine that can be used to drive state-based scene behaviour.
         /// </summary>
@@ -49,6 +49,11 @@ namespace CodySource
             /// A flag to dictate whether or not the exit callbacks are fired when the statemachine is destroyed
             /// </summary>
             public bool isExitInvokedOnDestroy = false;
+
+            /// <summary>
+            /// A series of global callbacks which are evaluated regardless of what state is entered
+            /// </summary>
+            public List<GlobalCallback> globalCallbacks = new List<GlobalCallback>();
 
             /// <summary>
             /// The available states that the state machine can switch between.
@@ -123,7 +128,7 @@ namespace CodySource
                 _info = new StateChangeEventInformation()
                 {
                     inboundState = _availableStates[0]?.name ?? "-Empty-",
-                    outboundState = _currentState?.name ?? "-Empty-" ,
+                    outboundState = _currentState?.name ?? "-Empty-",
                     reason = StateChangeEventInformation.StateChangeReason.EnterState
                 };
                 _SetState(_availableStates[0]);
@@ -178,19 +183,19 @@ namespace CodySource
             }
 
             /// <summary>
-            /// Targets a specific callback in a specific state and toggles its activity
-            /// State Name>Callback Name>True or T
+            /// Targets a specific callback in a specific state sets it to active
             /// </summary>
-            public void SetStateCallbackIsActive(string pInfo)
-            {
-                if (pInfo.Split('>').Length < 2) return;
-                State _target = _availableStates.Find(s => s.name == pInfo.Split('>')[0]);
-                if (_target == null) return;
-                State.Callback _callback = _target.callbacks.Find(c => c.name == pInfo.Split('>')[1]);
-                if (_callback == null) return;
-                _callback.active = (pInfo.Split('>').Length > 2 && 
-                    (pInfo.Split('>')[2].ToUpper() == "T" || pInfo.Split('>')[2].ToUpper() == "TRUE"));
-            }
+            public void SetStateCallbackActive(string pCallbackId) => _FindCallback(pCallbackId)?.SetActive(true);
+
+            /// <summary>
+            /// Targets a specific callback in a specific state sets it to inactive
+            /// </summary>
+            public void SetStateCallbackInactive(string pCallbackId) => _FindCallback(pCallbackId)?.SetActive(false);
+
+            /// <summary>
+            /// Log some text (useful for debugging)
+            /// </summary>
+            public void Debug(string pStr) => UnityEngine.Debug.Log(pStr);
 
             #endregion
 
@@ -227,6 +232,7 @@ namespace CodySource
             {
                 if (!conditions.HasFlag(State.CallbackCondition.Update)) return;
                 _currentState?._Update();
+                globalCallbacks.ForEach(c => { if (c.active && c.conditions.HasFlag(State.CallbackCondition.Update) && !c.ignoredStates.Contains(_currentState.name)) c.onInvoke?.Invoke(); });
             }
 
             /// <summary>
@@ -236,6 +242,7 @@ namespace CodySource
             {
                 if (!conditions.HasFlag(State.CallbackCondition.FixedUpdate)) return;
                 _currentState?._FixedUpdate();
+                globalCallbacks.ForEach(c => { if (c.active && c.conditions.HasFlag(State.CallbackCondition.FixedUpdate) && !c.ignoredStates.Contains(_currentState.name)) c.onInvoke?.Invoke(); });
             }
 
             /// <summary>
@@ -245,9 +252,11 @@ namespace CodySource
             {
                 _nextState = _pNextState;
                 if (_nextState == null) return;
+                globalCallbacks.FindAll(g => g.active && g.conditions.HasFlag(State.CallbackCondition.Exit) && !g.ignoredStates.Contains(_currentState.name)).ForEach(c => c.onInvoke?.Invoke());
                 _ExitState();
                 _currentState = _nextState;
                 if (conditions.HasFlag(State.CallbackCondition.Enter)) _currentState._Enter();
+                globalCallbacks.FindAll(g => g.active && g.conditions.HasFlag(State.CallbackCondition.Enter) && !g.ignoredStates.Contains(_currentState.name)).ForEach(c => c.onInvoke?.Invoke());
                 onStateChange.Invoke(_info);
             }
 
@@ -260,6 +269,19 @@ namespace CodySource
                 if (conditions.HasFlag(State.CallbackCondition.Exit)) _currentState._Exit();
             }
 
+            /// <summary>
+            /// Finds a callback by id
+            /// </summary>
+            private State.Callback _FindCallback(string pCallbackId)
+            {
+                foreach (State s in _availableStates)
+                {
+                    State.Callback callback = s.callbacks.Find(c => c.callbackId == pCallbackId);
+                    if (callback != null) return callback;
+                }
+                return null;
+            }
+
             #endregion
 
             #region PUBLIC STRUCTS
@@ -270,6 +292,12 @@ namespace CodySource
                 public StateChangeReason reason;
                 public string outboundState;
                 public string inboundState;
+            }
+
+            [System.Serializable]
+            public class GlobalCallback : State.Callback
+            {
+                public List<string> ignoredStates = new List<string>();
             }
 
             #endregion

@@ -1,6 +1,6 @@
 {
   "name": "com.codysource.statemachine",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "displayName": "State Machine",
   "description": "This package allows for the creation and reference to state machines within the scene.",
   "unity": "2020.3",

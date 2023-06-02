@@ -20,7 +20,7 @@ namespace CodySource
             public override void OnInspectorGUI()
             {
                 //  Update properties
-                serializedObject.Update();
+                serializedObject.UpdateIfRequiredOrScript();
 
                 //  Show the current state during playback
                 EditorGUILayout.BeginHorizontal(EditorStyles.helpBox);
